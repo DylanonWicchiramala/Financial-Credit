@@ -2,6 +2,7 @@
 import os
 import database.chat_history
 import utils
+import re
 
 utils.load_env()
 os.environ['LANGCHAIN_TRACING_V2'] = "false"
@@ -84,7 +85,7 @@ def submitUserMessage(
     verbose:bool=False,
     recursion_limit:int=20
     ) -> str:
-    set_current_user_id(user_id)
+    # set_current_user_id(user_id)
     
     chat_history = database.chat_history.get(user_id=user_id) if keep_chat_history else []
     chat_history = chat_history[-20:]
@@ -128,3 +129,38 @@ def submitUserMessage(
         return response, get_tools_output()
     else:
         return response
+    
+    
+def submitUserMessageWithDebugCommand(*arg, **kwargs) -> str:
+    user_input = arg[0]
+    
+    if re.search(r"//delete chat history", user_input):
+        o = database.chat_history.delete(user_id=kwargs['user_id'])
+        return f"chat history of this user have been deleted."
+        
+    if re.search(r"//reset user data", user_input):
+        database.customer.delete(user_id="test")
+        database.chat_history.delete(user_id=kwargs['user_id'])
+        database.customer.update({
+            "name":"สมชาย สายชม",
+        },user_id="test")
+        return f"reset user data \"test\"."
+    
+    if re.search(r"//chat history ?= ?true", user_input):
+        user_input = re.sub(r"//chat history ?= ?(true|false)", '', user_input)
+        kwargs['keep_chat_history'] = True
+        
+    if re.search(r"//chat history ?= ?false", user_input):
+        user_input = re.sub(r"//chat history ?= ?(true|false)", '', user_input)
+        kwargs['keep_chat_history'] = False
+        
+    if re.search(r"//debug", user_input):
+        user_input = re.sub(r"\debug", '', user_input)
+        kwargs['verbose'] = True
+        try:
+            return submitUserMessage(*arg,*kwargs)
+        except Exception as e:
+            return f"error: {e}"
+        
+        
+    return submitUserMessage(*arg,*kwargs)

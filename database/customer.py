@@ -41,54 +41,40 @@ def update(data: InputSchema, user_id: str = "test"):
     return get(user_id=user_id)
     
     
-def get(user_id:str="test"):
+def get(user_id:str=None, get_all=False):
     client, db = database.load_db()
     customer = db[COLLECTION_NAME]
     
-    query = customer.find_one({"user_id": user_id})
+    if user_id:
+        query = customer.find_one({"user_id": user_id})
+    elif get_all:
+        query = list(customer.find({}))
     
     client.close()
     return query
 
 
-def delete(user_id=None, time_before=None, delete_all=False):
-    """
-    Deletes chat history from the MongoDB collection.
-
-    Parameters:
-    - user_id (str, optional): The user_id whose chat history should be deleted.
-    - time_before (datetime, optional): Deletes chat history before this datetime.
-    - delete_all (bool, optional): If True, deletes all chat history for the user.
-
-    Returns:
-    - UpdateMany: The result of the update operation.
-    """
+def delete(user_id=None, delete_all=False):
     client, db = database.load_db()
     history = db[COLLECTION_NAME]
-    query = {}
+    query = None
 
     # If deleting all chat history for a specific user or all users
     if delete_all:
-        if user_id:
-            query = {'user_id': user_id}
-        else:
-            query = {}
-
-        # Remove entire chat history field
-        return history.update_many(query, {'$unset': {'chat_history': 1}})
-
+        query = {}
+        
     # If filtering by user and time_before
     if user_id:
-        query['user_id'] = user_id
+        query = {
+            'user_id':user_id
+        }
 
-    if time_before:
-        query['chat_history.timestamp'] = {'$lt': time_before}
-        # Remove specific entries from the chat history array based on the timestamp
-        return history.update_many(query, {'$pull': {'chat_history': {'timestamp': {'$lt': time_before}}}})
-    
-    res = history.delete_many(query)  # Delete documents matching the query
-    client.close()
-    return res
+    if query:
+        res = history.delete_many(query)  # Delete documents matching the query
+        client.close()
+        return res
+    else:
+        return None
 
 
 # delete chat history older than 30 days.

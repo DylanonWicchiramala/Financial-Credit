@@ -17,7 +17,7 @@ import database.customer
 # )
 
 tools_outputs=""
-CURRENT_USER_ID: str
+CURRENT_USER_ID: str = "test"
 
 
 def get_tools_output():
