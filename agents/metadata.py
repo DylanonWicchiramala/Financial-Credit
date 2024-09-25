@@ -32,9 +32,6 @@ agents_metadata = {
                 2.	Gather Customer Data:
             Use the get_customer_data tool to retrieve the customer’s name and any available credit-related information.
 
-            Example:
-            “Let me quickly check your profile first.” (Use the get_customer_data tool here.)
-
                 3.	Fill in Missing Data:
             If some information is missing, such as current debt, monthly interest payments, or income, politely ask the customer to provide the missing details. If they seem hesitant, reassure them about the privacy of their information.
         """ ,
