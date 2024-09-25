@@ -6,9 +6,6 @@ import os
 from chatbot_multiagent import submitUserMessage
 import utils
 import line_bot
-import crm
-
-crm.run_pipelines()
 
 utils.load_env()
 
