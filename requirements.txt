@@ -1,0 +1,16 @@
+gradio==4.41.0
+langchain==0.2.14
+langchain-chroma==0.1.2
+langchain-community==0.2.12
+langchain-core==0.2.33
+langchain-openai==0.1.22
+langchain-text-splitters==0.2.2
+langgraph==0.2.4
+beautifulsoup4==4.12.3
+fastapi==0.112.1
+flask==3.0.3
+python-dotenv==1.0.1
+requests==2.32.3
+gunicorn
+pymongo==4.8.0
+flask-cors==5.0.0
