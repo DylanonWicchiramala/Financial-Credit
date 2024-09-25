@@ -46,17 +46,17 @@ def set_current_user_id(user_id:str):
 
 
 class CustomerInput(TypedDict):
-    name: NotRequired[str] = None
-    age: NotRequired[int] = None
-    income_source: NotRequired[list[Literal["employment", "business", "investment", "freelance", "rental"]]] = None
-    monthly_income: NotRequired[int] = None
-    job_status: NotRequired[Literal["employed", "self-employed", "unemployed"]] = None
-    outstanding_loan_amount: NotRequired[int] = None
-    loan_history: NotRequired[Literal['ever', 'never']] = None
-    missed_payments: NotRequired[Literal['ever', 'never']] = None
-    total_debt_payment_monthly: NotRequired[int] = None
-    payment_types: NotRequired[str] = None
-    significant_assets: NotRequired[str] = None
+    name: NotRequired[str]
+    age: NotRequired[int]
+    income_source: NotRequired[list[Literal["employment", "business", "investment", "freelance", "rental"]]]
+    monthly_income: NotRequired[int]
+    job_status: NotRequired[Literal["employed", "self-employed", "unemployed"]]
+    outstanding_loan_amount: NotRequired[int]
+    loan_history: NotRequired[Literal['ever', 'never']]
+    missed_payments: NotRequired[Literal['ever', 'never']]
+    total_debt_payment_monthly: NotRequired[int]
+    payment_types: NotRequired[str]
+    significant_assets: NotRequired[str]
 
 
 def set_customer_data(input:CustomerInput):
@@ -84,7 +84,24 @@ def get_customer_data():
     """
     global CURRENT_USER_ID
     user_id = CURRENT_USER_ID
-    return database.customer.get(user_id=user_id.strip())
+    data_fields = [
+        "name",
+        "age",
+        "income_source",
+        "monthly_income",
+        "job_status",
+        "outstanding_loan_amount",
+        "loan_history",
+        "missed_payments",
+        "total_debt_payment_monthly",
+        "payment_types",
+        "significant_assets",
+    ]
+    # data_outputs = {}
+    customer_data = CustomerInput(database.customer.get(user_id=user_id.strip()))
+    for key in data_fields:
+        customer_data[key] = customer_data.get(key, None)
+    return customer_data
 
 
 set_customer_data = tool(set_customer_data)
