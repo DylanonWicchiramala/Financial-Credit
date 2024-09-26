@@ -1,6 +1,7 @@
 # load env ------------------------------------------------------------------------
 import os
 import database.chat_history
+import database.customer
 import utils
 import re
 
@@ -10,7 +11,7 @@ os.environ['LANGCHAIN_TRACING_V2'] = "false"
 
 # debug ------------------------------------------------------------------
 from langchain.globals import set_debug, set_verbose
-set_verbose(True)
+set_verbose(False)
 set_debug(False)
 
 from langchain_core.messages import (
@@ -86,7 +87,6 @@ def submitUserMessage(
     recursion_limit:int=20
     ) -> str:
     # set_current_user_id(user_id)
-    
     chat_history = database.chat_history.get(user_id=user_id) if keep_chat_history else []
     chat_history = chat_history[-20:]
     
@@ -143,8 +143,17 @@ def submitUserMessageWithDebugCommand(*arg, **kwargs) -> str:
         database.chat_history.delete(user_id=kwargs['user_id'])
         database.customer.update({
             "name":"สมชาย สายชม",
-        },user_id="test")
-        return f"reset user data \"test\"."
+        },user_id=kwargs['user_id'])
+        return f"your user data have been reset."
+    
+    if re.search(r"//get chat history", user_input):
+        history = database.chat_history.get_str(user_id=kwargs['user_id'])
+        nl = "\n"
+        return f"chat history: \n{nl.join(history)}"
+        
+    if re.search(r"//get user data", user_input):
+        user_data = database.customer.get(user_id=kwargs['user_id'])
+        return f"user data: \n{user_data}"
     
     if re.search(r"//chat history ?= ?true", user_input):
         user_input = re.sub(r"//chat history ?= ?(true|false)", '', user_input)
@@ -163,4 +172,4 @@ def submitUserMessageWithDebugCommand(*arg, **kwargs) -> str:
             return f"error: {e}"
         
         
-    return submitUserMessage(*arg,*kwargs)
+    return submitUserMessage(*arg,**kwargs)

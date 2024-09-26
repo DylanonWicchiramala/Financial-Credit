@@ -32,7 +32,7 @@ async def webhook():
                 if event['type'] == 'message':
                     user_message = event["message"]["text"]
                     # Model Invoke
-                    response = submitUserMessageWithDebugCommand(user_message, user_id=user_id, keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
+                    response = submitUserMessageWithDebugCommand(user_message, user_id="test", keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
                     response = utils.format_bot_response(response, markdown=False)
                     line_bot.ReplyMessage(reply_token, response)
             
