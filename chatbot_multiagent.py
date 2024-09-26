@@ -138,13 +138,13 @@ def submitUserMessageWithDebugCommand(*arg, **kwargs) -> str:
         o = database.chat_history.delete(user_id=kwargs['user_id'])
         return f"chat history of this user have been deleted."
         
-    if re.search(r"//reset user data", user_input):
+    if re.search(r"//reset", user_input):
         database.customer.delete(user_id="test")
         database.chat_history.delete(user_id=kwargs['user_id'])
         database.customer.update({
             "name":"สมชาย สายชม",
         },user_id=kwargs['user_id'])
-        return f"your user data have been reset."
+        return f"user data and chat history have been reset."
     
     if re.search(r"//get chat history", user_input):
         history = database.chat_history.get_str(user_id=kwargs['user_id'])
