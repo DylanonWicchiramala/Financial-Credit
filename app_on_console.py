@@ -5,5 +5,5 @@ from chatbot_multiagent import submitUserMessageWithDebugCommand
 
 while True:
     message = input("Human: ")
-    bot_message = submitUserMessageWithDebugCommand(message, user_id="test", keep_chat_history=True, verbose=False)
+    bot_message = submitUserMessageWithDebugCommand(message, user_id="test", keep_chat_history=True, verbose=True)
     print("Bot meassage: ", bot_message)

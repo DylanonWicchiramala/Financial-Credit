@@ -58,7 +58,7 @@ agents_metadata = {
                 - “ยอดหนี้ปัจจุบันส่วนใหญ่มาจากอะไรบ้างคะ เช่น รถยนต์ บ้าน หรือ บัตรเครดิต?”
                 - “ปัจจุบันคุณมียอดหนี้ที่ต้องชำระต่อเดือนประมาณเท่าไหร่คะ?”
                 
-                Use the set_customer_data tool to save the new information into the database after getting it.
+                Use the set_customer_data tool to save the new information you get from customer into the database after getting it.
 
             4. **Ending**: 
                 Once you’ve gathered the necessary data, thank the customer for their time and let them know the purpose of the data collection. 
