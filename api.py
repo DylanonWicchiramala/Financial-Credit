@@ -3,7 +3,7 @@ from flask_cors import CORS
 import json
 import requests
 import os
-from chatbot_multiagent import submitUserMessage
+from chatbot_multiagent import submitUserMessage, submitUserMessageWithDebugCommand
 import utils
 import line_bot
 
@@ -32,7 +32,7 @@ async def webhook():
                 if event['type'] == 'message':
                     user_message = event["message"]["text"]
                     # Model Invoke
-                    response = submitUserMessage(user_message, user_id=user_id, keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
+                    response = submitUserMessageWithDebugCommand(user_message, user_id="test", keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
                     response = utils.format_bot_response(response, markdown=False)
                     line_bot.ReplyMessage(reply_token, response)
             
@@ -58,7 +58,7 @@ def chatbot_test():
         return jsonify({"error": "Message is required"}), 400
 
     try:
-        response = submitUserMessage(user_message, user_id="test", keep_chat_history=False, return_reference=True, verbose=BOT_VERBOSE)
+        response = submitUserMessageWithDebugCommand(user_message, user_id="test", keep_chat_history=False, return_reference=True, verbose=BOT_VERBOSE)
         response = utils.format_bot_response(response, markdown=False)
         
         if isinstance(response, list):

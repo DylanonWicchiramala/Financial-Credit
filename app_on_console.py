@@ -1,7 +1,9 @@
 import time
-from chatbot_multiagent import submitUserMessage
+from chatbot_multiagent import submitUserMessageWithDebugCommand
+
+# submitUserMessageWithDebugCommand("/", user_id="test", keep_chat_history=True, verbose=False)
 
 while True:
     message = input("Human: ")
-    bot_message = submitUserMessage(message, keep_chat_history=True, return_reference=False, verbose=False)
+    bot_message = submitUserMessageWithDebugCommand(message, user_id="test", keep_chat_history=True, verbose=False)
     print("Bot meassage: ", bot_message)

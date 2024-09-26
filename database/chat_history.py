@@ -57,6 +57,28 @@ def get(user_id:str="test", chat_history:list=[]):
     return chat_history
 
 
+def get_str(user_id:str="test", chat_history:list=[]):
+    client, db = database.load_db()
+    history = db[COLLECTION_NAME]
+    
+    query = history.find_one({"user_id": user_id})
+    if query is None:
+        query = {
+            "user_id": user_id,
+            "chat_history": [],
+        }
+        history.insert_one(query)
+
+    for i, msg in enumerate(query["chat_history"]):
+        msg = msg['content']
+        chat_history.append(
+            "Bot: " + msg if i % 2 == 1 else "Human: " + msg
+        )
+    
+    client.close()
+    return chat_history
+
+
 def delete(user_id=None, time_before=None, delete_all=False):
     """
     Deletes chat history from the MongoDB collection.
