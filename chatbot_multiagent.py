@@ -76,7 +76,6 @@ workflow.add_conditional_edges(
 )
 
 workflow.add_edge(START, "service")
-graph = workflow.compile()
 
 def submitUserMessage(
     user_input:str, 

@@ -48,7 +48,7 @@ def create_agent(llm, tools, system_message: str):
     agent = prompt | llm
     return agent
 
-
+from pprint import pprint
 ## create agent node
 def agent_node(state, agent, name):
     result = agent.invoke(state)
@@ -56,10 +56,11 @@ def agent_node(state, agent, name):
     if isinstance(result, ToolMessage):
         pass
     else:
+        chat_history = state.get('chat_history')
         result = AIMessage(**result.dict(exclude={"type", "name"}), name=name)
-        # result = AIMessage(**result.dict(), name=name)
     return {
         "messages": [result],
+        "chat_history" : chat_history,
         # Since we have a strict workflow, we can
         # track the sender so we know who to pass to next.
         "sender": name,
