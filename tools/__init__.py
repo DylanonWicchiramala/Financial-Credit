@@ -81,11 +81,9 @@ def get_customer_data():
     global CURRENT_USER_ID
     user_id = CURRENT_USER_ID
     data_fields = [
-        "name",
         "age",
         "income_source",
         "monthly_income",
-        "job_status",
         "outstanding_loan_amount",
         "loan_history",
         "missed_payments",

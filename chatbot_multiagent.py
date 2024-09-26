@@ -88,7 +88,7 @@ def submitUserMessage(
     ) -> str:
     # set_current_user_id(user_id)
     chat_history = database.chat_history.get(user_id=user_id) if keep_chat_history else []
-    chat_history = chat_history[-20:]
+    chat_history = chat_history[-8:]
     
     # memory only keep chat history only along agents.
     # internal_level_memory = MemorySaver()
