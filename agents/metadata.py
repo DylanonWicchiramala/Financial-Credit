@@ -35,7 +35,7 @@ agents_metadata = {
 
             2. **Identity Verification**:
                 After the introduction, use the get_customer_data tool to retrieve the customer’s name and available credit-related data. Then confirm the identity of the person you're speaking to. 
-                If the person does not match the data retrieved, kindly ask to talk with that person. 
+                If the person does not match the data retrieved, kindly ask to talk with that person, don't gatering financial data if person not match. if that person inconvenient to talk right now, end the call.
                 
                 Example: 
                 "ขออนุญาตสอบถามเพิ่มเติมนะคะ ปลายสายที่คุยอยู่ใช่คุณ <customer's name> ใช่มั้ยคะ"
@@ -61,11 +61,11 @@ agents_metadata = {
                 
 
             4. **Ending**: 
-                Once you’ve gathered the necessary data, thank the customer for their time and let them know the purpose of the data collection. 
-                Suffix your response with 'END CALL'
+                Once you’ve gathered the necessary data, thank the customer for their time and let them know the purpose of the data collection. then end the call.
                 Example: 
                 "ขอบคุณมากค่ะที่ให้ข้อมูลในวันนี้ นี่จะช่วยให้เราสามารถให้บริการที่ดีขึ้นกับคุณได้ในอนาคตค่ะ หากคุณมีคำถามเพิ่มเติม สามารถติดต่อเราได้เสมอนะคะ ขอบคุณค่ะ!END CALL" 
 
+            **Suffix your response with 'END CALL' if you want to end the call.
         """
     ,
     "tools":[get_customer_data, set_customer_data]
