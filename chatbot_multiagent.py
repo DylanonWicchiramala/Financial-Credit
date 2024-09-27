@@ -66,20 +66,19 @@ class AgentBot:
         self.create_workflow()
 
 
-    def router(self, state) -> Literal["call_tool", "continue", "__end__"]:
-        # This is the router
-        messages = state["messages"]
-        last_message = messages[-1]
-        if "FINALANSWER" in last_message.content:
-            return "__end__"
-        if last_message.tool_calls:
-            # The previous agent is invoking a tool
-            return "call_tool"
-        else:
-            return "continue"
-
-
     def create_workflow(self):
+        def router(state) -> Literal["call_tool", "continue", "__end__"]:
+            # This is the router
+            messages = state["messages"]
+            last_message = messages[-1]
+            if "FINALANSWER" in last_message.content:
+                return "__end__"
+            if last_message.tool_calls:
+                # The previous agent is invoking a tool
+                return "call_tool"
+            else:
+                return "continue"
+        
         workflow = StateGraph(AgentState)
 
         # add agent nodes
@@ -90,7 +89,7 @@ class AgentBot:
 
         workflow.add_conditional_edges(
             "service",
-            self.router,
+            router,
             {
                 "call_tool": "call_tool",
                 "__end__": END,
@@ -198,10 +197,6 @@ class AgentBot:
             if not re.search(r"//", user_input):
                 return func(*args, **kwargs)
                 
-            if re.search(r"//delete chat history", user_input):
-                o = database.chat_history.delete(user_id=user_id)
-                return f"chat history of this user have been deleted."
-                
             if re.search(r"//reset", user_input):
                 database.customer.delete(user_id="test")
                 database.chat_history.delete(user_id=user_id)
@@ -210,8 +205,12 @@ class AgentBot:
                 },user_id=user_id)
                 return f"user data and chat history have been reset."
             
+            if re.search(r"//delete chat history", user_input):
+                o = database.chat_history.delete(user_id=user_id)
+                return f"chat history of this user have been deleted."
+            
             if re.search(r"//get chat history", user_input):
-                history = database.chat_history.get_str(user_id=user_id)
+                history = database.chat_history.get_str(user_id=user_id, chat_history=[])
                 nl = "\n"
                 return f"chat history: \n{nl.join(history)}"
                 
@@ -225,7 +224,7 @@ class AgentBot:
                     return func(*args, **kwargs)
                 except Exception as e:
                     return f"error: {e}"
-                
+            
             for configkey in self.config.keys():
                 if re.search(r"//{configkey} ?= ?".format(configkey=configkey), user_input):
                     input_config_value = re.sub(r"//{configkey} ?= ?".format(configkey=configkey), '', user_input)
