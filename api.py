@@ -3,7 +3,7 @@ from flask_cors import CORS
 import json
 import requests
 import os
-from chatbot_multiagent import submitUserMessage, submitUserMessageWithDebugCommand
+from chatbot_multiagent import AgentBot
 import utils
 import line_bot
 
@@ -12,9 +12,12 @@ utils.load_env()
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+
 CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_TOKEN")
 CHANNEL_SECRET = os.environ.get("LINE_SECRET")
 BOT_VERBOSE = int(os.environ['BOT_VERBOSE'])
+
+Bot = AgentBot(keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
 
 @app.route('/', methods=['POST', 'GET'])
 async def webhook():
@@ -32,7 +35,7 @@ async def webhook():
                 if event['type'] == 'message':
                     user_message = event["message"]["text"]
                     # Model Invoke
-                    response = submitUserMessageWithDebugCommand(user_message, user_id="test", keep_chat_history=True, return_reference=False, verbose=BOT_VERBOSE)
+                    response = Bot.submit_user_message_with_debug_command(user_message, user_id="test")
                     response = utils.format_bot_response(response, markdown=False)
                     line_bot.ReplyMessage(reply_token, response)
             
@@ -58,7 +61,7 @@ def chatbot_test():
         return jsonify({"error": "Message is required"}), 400
 
     try:
-        response = submitUserMessageWithDebugCommand(user_message, user_id="test", keep_chat_history=False, return_reference=True, verbose=BOT_VERBOSE)
+        response = Bot.submit_user_message_with_debug_command(user_message, user_id="test")
         response = utils.format_bot_response(response, markdown=False)
         
         if isinstance(response, list):

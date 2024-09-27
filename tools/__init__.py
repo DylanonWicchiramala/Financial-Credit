@@ -105,3 +105,5 @@ all_tools = [
     set_customer_data,
     get_customer_data,
     ]
+
+tools = {tool.name: tool for tool in all_tools}

@@ -1,6 +1,7 @@
-import time
 import gradio as gr
-from chatbot_multiagent import submitUserMessage
+from chatbot_multiagent import AgentBot
+
+Bot = AgentBot(keep_chat_history=False, return_reference=False, verbose=False)
 
 
 # def chat(message:str, history):
@@ -21,7 +22,7 @@ with gr.Blocks() as demo:
     clear = gr.ClearButton([msg, chatbot])
 
     def respond(message, chat_history):
-        bot_message = submitUserMessage(message, keep_chat_history=False, return_reference=False)
+        bot_message = Bot.submit_user_message_with_debug_command(message)
         chat_history.append((message, bot_message))
         return "", chat_history
 
