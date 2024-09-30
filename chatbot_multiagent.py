@@ -64,8 +64,78 @@ class AgentBot:
         self.agents = agents_metadata
         self.config.update(**config)
         self.create_workflow()
+                
+        
+    def __with_debug_command(self, func):
+        def __convert_input_value(input_config_value: str):
+            # Check if input is a boolean
+            if input_config_value.lower() == "false":
+                return False
+            elif input_config_value.lower() == "true":
+                return True
+            
+            # Check if input is an integer
+            try:
+                int_value = int(input_config_value)
+                return int_value
+            except ValueError:
+                pass
 
+            # Check if input is a float
+            try:
+                float_value = float(input_config_value)
+                return float_value
+            except ValueError:
+                pass
 
+            # If none of the above, return the original string
+            return input_config_value
+        
+        @functools.wraps(func)  # Preserve the original function's metadata
+        def wrapper(self, *args, **kwargs):
+            user_input = args[0]
+            user_id = kwargs['user_id']
+            
+            if not re.search(r"//", user_input):
+                return func(*args, **kwargs)
+                
+            if re.search(r"//reset", user_input):
+                database.customer.delete(user_id="test")
+                database.chat_history.delete(user_id=user_id)
+                database.customer.update({
+                    "name":"สมชาย สายชม",
+                },user_id=user_id)
+                return f"user data and chat history have been reset."
+            
+            if re.search(r"//delete chat history", user_input):
+                o = database.chat_history.delete(user_id=user_id)
+                return f"chat history of this user have been deleted."
+            
+            if re.search(r"//get chat history", user_input):
+                history = database.chat_history.get_str(user_id=user_id, chat_history=[])
+                nl = "\n"
+                return f"chat history: \n{nl.join(history)}"
+                
+            if re.search(r"//get user data", user_input):
+                user_data = database.customer.get(user_id=user_id)
+                return f"user data: \n{user_data}"
+                
+            if re.search(r"//debug", user_input):
+                user_input = re.sub(r"//debug", '', user_input)
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    return f"error: {e}"
+            
+            for configkey in self.config.keys():
+                if re.search(r"//{configkey} ?= ?".format(configkey=configkey), user_input):
+                    input_config_value = re.sub(r"//{configkey} ?= ?".format(configkey=configkey), '', user_input)
+                    self.config[configkey] = __convert_input_value(input_config_value)
+                    return f"set config: {configkey} to {input_config_value}"
+            
+        return wrapper
+    
+    
     def create_workflow(self):
         def router(state) -> Literal["call_tool", "continue", "__end__"]:
             # This is the router
@@ -142,15 +212,12 @@ class AgentBot:
             {"recursion_limit": self.config['recursion_limit'], "thread_id":self.config['thread_id']},
         )
         
-        if not self.config['verbose']:
-            events = [e for e in events]
-            response = list(events[-1].values())[0]
-        else:
-            for e in events:
-                a = list(e.items())[0]
+        for e in events:
+            a = list(e.items())[0]
+            if self.config['verbose']:
                 a[1]['messages'][0].pretty_print()
-            
-            response = a[1]
+        
+        response = a[1]
         
         response = response["messages"][0].content
         response = utils.format_bot_response(response, markdown=True)
@@ -164,75 +231,51 @@ class AgentBot:
             return response
         
         
-    def with_debug_command(self, func):
-        def __convert_input_value(input_config_value: str):
-            # Check if input is a boolean
-            if input_config_value.lower() == "false":
-                return False
-            elif input_config_value.lower() == "true":
-                return True
-            
-            # Check if input is an integer
-            try:
-                int_value = int(input_config_value)
-                return int_value
-            except ValueError:
-                pass
-
-            # Check if input is a float
-            try:
-                float_value = float(input_config_value)
-                return float_value
-            except ValueError:
-                pass
-
-            # If none of the above, return the original string
-            return input_config_value
+    async def asubmit_user_message(
+        self,
+        user_input:str, 
+        user_id:str="test", 
+        ) -> str:
+        # set_current_user_id(user_id)
+        chat_history = database.chat_history.get(user_id=user_id) if self.config['keep_chat_history'] else []
+        chat_history = chat_history[-8:]
         
-        @functools.wraps(func)  # Preserve the original function's metadata
-        def wrapper(self, *args, **kwargs):
-            user_input = args[0]
-            user_id = kwargs['user_id']
-            
-            if not re.search(r"//", user_input):
-                return func(*args, **kwargs)
-                
-            if re.search(r"//reset", user_input):
-                database.customer.delete(user_id="test")
-                database.chat_history.delete(user_id=user_id)
-                database.customer.update({
-                    "name":"สมชาย สายชม",
-                },user_id=user_id)
-                return f"user data and chat history have been reset."
-            
-            if re.search(r"//delete chat history", user_input):
-                o = database.chat_history.delete(user_id=user_id)
-                return f"chat history of this user have been deleted."
-            
-            if re.search(r"//get chat history", user_input):
-                history = database.chat_history.get_str(user_id=user_id, chat_history=[])
-                nl = "\n"
-                return f"chat history: \n{nl.join(history)}"
-                
-            if re.search(r"//get user data", user_input):
-                user_data = database.customer.get(user_id=user_id)
-                return f"user data: \n{user_data}"
-                
-            if re.search(r"//debug", user_input):
-                user_input = re.sub(r"//debug", '', user_input)
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    return f"error: {e}"
-            
-            for configkey in self.config.keys():
-                if re.search(r"//{configkey} ?= ?".format(configkey=configkey), user_input):
-                    input_config_value = re.sub(r"//{configkey} ?= ?".format(configkey=configkey), '', user_input)
-                    self.config[configkey] = __convert_input_value(input_config_value)
-                    return f"set config: {configkey} to {input_config_value}"
-            
-        return wrapper
+        # memory only keep chat history only along agents.
+        # internal_level_memory = MemorySaver()
+        # graph = workflow.compile(checkpointer=internal_level_memory)
+        
+        graph = self.workflow.compile()
+
+        events = graph.astream(
+            {
+                "messages": [
+                    HumanMessage(
+                        user_input
+                    )
+                ],
+                "chat_history": chat_history
+            },
+            # Maximum number of steps to take in the graph
+            {"recursion_limit": self.config['recursion_limit'], "thread_id":self.config['thread_id']},
+            stream_mode="values"
+        )
+        
+        async for e in events:
+            if self.config['verbose']: 
+                e["messages"][-1].pretty_print()
+            response = e["messages"][-1]
+        
+        response = response.content
+        response = utils.format_bot_response(response, markdown=True)
+        
+        if self.config['keep_chat_history']:
+            chat_history = database.chat_history.insert(bot_message=response, human_message=user_input, user_id=user_id)
+        
+        if self.config['return_reference']:
+            return response, get_tools_output()
+        else:
+            return response
       
             
     def submit_user_message_with_debug_command(self, *args, **kwargs) -> str:
-        return self.with_debug_command(self.submit_user_message)(self, *args, **kwargs)
+        return self.__with_debug_command(self.submit_user_message)(self, *args, **kwargs)

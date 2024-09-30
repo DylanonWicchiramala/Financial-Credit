@@ -9,6 +9,7 @@ import requests
 import random
 from math import inf
 from time import time, sleep
+from tqdm import tqdm
 import utils
 
 def save_test_result(test_result, path:str = 'test/testset/QA_test_result.txt'):
@@ -37,7 +38,7 @@ def QA_sample_test(quesion_test:list[str], result_save_path='test/testset/QA_tes
     sample_quesion = random.sample(quesion_test, num_samples)
         
     result = []
-    for quesion in sample_quesion:
+    for quesion in tqdm(sample_quesion):
         try:
             answer = submitUserMessage(quesion, keep_chat_history=True)
             print("Response: ", answer[:100].replace("\n", " "), "...")
@@ -61,7 +62,7 @@ def API_test(quesion_test:list[str], result_save_path='test/testset/api_QA_test_
     sample_quesion = random.sample(quesion_test, num_samples)
     
     result = []
-    for quesion in sample_quesion:
+    for quesion in tqdm(sample_quesion):
         headers = {"Content-Type": "application/json"}
         data = {"message": quesion}
 
