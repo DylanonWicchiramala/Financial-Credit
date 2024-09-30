@@ -14,10 +14,15 @@ from agents.metadata import (
 )
 import functools
 
+from langchain_core.callbacks import StreamingStdOutCallbackHandler
+
 llm = ChatOpenAI(
     model="gpt-4o-mini-2024-07-18", 
     temperature=0, 
     top_p=0, 
+    callbacks=[
+            StreamingStdOutCallbackHandler(),
+            ]
     )
 
 ## Create agents ------------------------------------------------------------------------
@@ -56,10 +61,11 @@ def agent_node(state, agent, name):
     if isinstance(result, ToolMessage):
         pass
     else:
+        chat_history = state.get('chat_history')
         result = AIMessage(**result.dict(exclude={"type", "name"}), name=name)
-        # result = AIMessage(**result.dict(), name=name)
     return {
         "messages": [result],
+        "chat_history" : chat_history,
         # Since we have a strict workflow, we can
         # track the sender so we know who to pass to next.
         "sender": name,
