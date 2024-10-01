@@ -15,9 +15,8 @@ COLLECTION_NAME = "Customer"
 class InputSchema(TypedDict):
     name: NotRequired[str]
     age: NotRequired[int]
-    income_source: NotRequired[list[Literal["employment", "business", "investment", "freelance", "rental"]]]
+    income_source: NotRequired[list[Literal["employment", "business", "investment", "freelance", "rental","gifts or financial support", "none"]]]
     monthly_income: NotRequired[int]
-    job_status: NotRequired[Literal["employed", "self-employed", "unemployed"]]
     outstanding_loan_amount: NotRequired[int]
     loan_history: NotRequired[Literal['ever', 'never']]
     missed_payments: NotRequired[Literal['ever', 'never']]
