@@ -25,6 +25,7 @@ llm = ChatOpenAI(
             ]
     )
 
+# TODO: combine create_agent and agent_node
 ## Create agents ------------------------------------------------------------------------
 def create_agent(llm, tools, system_message: str):
     # memory = ConversationBufferMemory(memory_key='chat_history', return_messages=False)
