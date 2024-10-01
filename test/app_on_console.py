@@ -8,7 +8,7 @@ import requests
 from time import time
 from chatbot_multiagent import AgentBot
 
-Bot = AgentBot(keep_chat_history=True, verbose=False)
+Bot = AgentBot(keep_chat_history=True, verbose=True)
 
 # url = "https://market-feasibility-analysis-chatbot-2-jelvbvjqna-uc.a.run.app/test"
 url = "http://127.0.0.1:8080/test"
@@ -36,4 +36,4 @@ while True:
     bot_message = Bot.submit_user_message_with_debug_command(message, user_id="test")
     print("Bot meassage: ", bot_message)
     
-    print(f"process exetcution time {round(time()-stt,2)} sec.")
+    # print(f"process exetcution time {round(time()-stt,2)} sec.")

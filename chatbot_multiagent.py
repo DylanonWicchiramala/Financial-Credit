@@ -136,6 +136,12 @@ class AgentBot:
         return wrapper
     
     
+    def draw_graph(self):
+        from IPython.display import Image, display
+        graph = self.workflow.compile()
+        return display(Image(graph.get_graph(xray=True).draw_mermaid_png()))
+    
+    
     def create_workflow(self):
         def router(state) -> Literal["call_tool", "continue", "__end__"]:
             # This is the router
