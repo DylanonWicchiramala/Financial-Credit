@@ -4,7 +4,8 @@ from langchain_core.tools import tool
 import functools
 from copy import copy
 
-from typing import TypedDict, Optional, NotRequired, Literal
+from typing import Optional, NotRequired, Literal
+from typing_extensions import TypedDict
 import database
 import database.customer
 

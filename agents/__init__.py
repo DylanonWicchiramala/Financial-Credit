@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import (
     AIMessage, 
     BaseMessage,
@@ -14,16 +14,15 @@ from agents.metadata import (
 )
 import functools
 
-from langchain_core.callbacks import StreamingStdOutCallbackHandler
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini-2024-07-18", 
-    temperature=0, 
-    top_p=0, 
-    callbacks=[
-            StreamingStdOutCallbackHandler(),
-            ]
-    )
+llm = ChatGroq(
+    model="llama3-groq-70b-8192-tool-use-preview",
+    temperature=0,
+    max_tokens=None,
+    # timeout=None,
+    # max_retries=2,
+    # other params...
+)
 
 ## Create agents ------------------------------------------------------------------------
 def create_agent(llm, tools, system_message: str):
