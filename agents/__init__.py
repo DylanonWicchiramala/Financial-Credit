@@ -8,38 +8,47 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 import operator
 from typing import Annotated, Sequence, TypedDict, List
-from agents.metadata import (
-    system_prompt,
-    agents_metadata
+from agents.prompt import (
+    SYSTEM_PROMPT,
+    SERVICE_PROMPT
+)
+from tools import (
+    all_tools, 
+    set_customer_data,
+    get_customer_data
 )
 import functools
-
-from langchain_core.callbacks import StreamingStdOutCallbackHandler
 
 llm = ChatOpenAI(
     model="gpt-4o-mini-2024-07-18", 
     temperature=0, 
     top_p=0, 
-    callbacks=[
-            StreamingStdOutCallbackHandler(),
-            ]
     )
 
-## Create agents ------------------------------------------------------------------------
-def create_agent(llm, tools, system_message: str):
-    # memory = ConversationBufferMemory(memory_key='chat_history', return_messages=False)
-    """Create an agent."""
+## Define state ------------------------------------------------------------------------
+# This defines the object that is passed between each node
+# in the graph. We will create different nodes for each agent and tool
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    chat_history: List[BaseMessage]
+    sender: str
+
+
+def __bind(llm, tools:list, agnet_prompt:str):
+    """ create llm with SYSTEM_PROMPT and agent prompt, bind tools, then return agent.
+    """
+    ## create agents with prompt and tools.
     prompt = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                system_prompt,
+                SYSTEM_PROMPT,
             ),
             MessagesPlaceholder(variable_name="chat_history"),
             MessagesPlaceholder(variable_name="messages"),
         ]
     )
-    prompt = prompt.partial(system_message=system_message)
+    prompt = prompt.partial(system_message=agnet_prompt)
     prompt = prompt.partial(agent_names=agent_names)
     
     # return llm without tools
@@ -54,13 +63,18 @@ def create_agent(llm, tools, system_message: str):
     return agent
 
 
-## create agent node
-def agent_node(state, agent, name):
+def service_node_build(state:AgentState, name, tools) -> AgentState:
+    llm = ChatOpenAI(
+    model="gpt-4o-mini-2024-07-18", 
+    temperature=0, 
+    top_p=0, 
+    )
+    
+    agent = __bind(llm, tools, SERVICE_PROMPT)
+    
     result = agent.invoke(state)
     # We convert the agent output into a format that is suitable to append to the global state
-    if isinstance(result, ToolMessage):
-        pass
-    else:
+    if not isinstance(result, ToolMessage):
         chat_history = state.get('chat_history')
         result = AIMessage(**result.dict(exclude={"type", "name"}), name=name)
     return {
@@ -72,22 +86,10 @@ def agent_node(state, agent, name):
     }
 
 
-## Define state ------------------------------------------------------------------------
-# This defines the object that is passed between each node
-# in the graph. We will create different nodes for each agent and tool
-class AgentState(TypedDict):
-    messages: Annotated[Sequence[BaseMessage], operator.add]
-    chat_history: List[BaseMessage]
-    sender: str
+agent_names = ['service']
 
+agent_nodes = {name:None for name in agent_names}
 
-agent_names = list(agents_metadata.keys())
+agent_nodes['service'] = functools.partial(service_node_build, name='service', tools=all_tools)
 
-for name in agent_names:
-    agents_metadata[name]['node'] = create_agent(
-            llm,
-            agents_metadata[name]['tools'],
-            system_message=agents_metadata[name]['prompt'],
-        )
-
-    agents_metadata[name]['node'] = functools.partial(agent_node, agent=agents_metadata[name]['node'], name=name)
+# agent_nodes['service']({'chat_history':[], 'messages':[]})

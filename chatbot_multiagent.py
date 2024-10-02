@@ -24,13 +24,12 @@ from langchain_core.tools.structured import StructuredTool
 from langgraph.graph import END, StateGraph, START
 from agents import(
     AgentState,
-    agents_metadata,
-    agent_names
+    agent_names,
+    agent_nodes
 )
+from tools import get_tools_output, all_tools, set_current_user_id
 from functools import partial
 from langgraph.checkpoint.memory import MemorySaver
-
-from tools import get_tools_output, all_tools, set_current_user_id
 import database
 ## Define Tool Node
 from langgraph.prebuilt import ToolNode
@@ -48,7 +47,7 @@ class BotConfig(TypedDict):
 class AgentBot:
     tool_node:ToolNode
     agent_names:list[str]
-    agents:dict[str, dict[str, partial]]
+    agent_nodes:dict[str, dict[str, partial]]
     workflow: StateGraph
     config:BotConfig = BotConfig({
         'keep_chat_history': False,
@@ -60,8 +59,8 @@ class AgentBot:
     
     def __init__(self, **config:BotConfig):
         self.tool_node = ToolNode(all_tools)
-        self.agent_names = list(agents_metadata.keys())
-        self.agents = agents_metadata
+        self.agent_names = agent_names
+        self.agent_nodes = agent_nodes
         self.config.update(**config)
         self.create_workflow()
                 
@@ -158,8 +157,8 @@ class AgentBot:
         workflow = StateGraph(AgentState)
 
         # add agent nodes
-        for name, value in self.agents.items():
-            workflow.add_node(name, value['node'])
+        for name, node in self.agent_nodes.items():
+            workflow.add_node(name, node)
             
         workflow.add_node("call_tool", self.tool_node)
 
