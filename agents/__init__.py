@@ -19,12 +19,6 @@ from tools import (
 )
 import functools
 
-llm = ChatOpenAI(
-    model="gpt-4o-mini-2024-07-18", 
-    temperature=0, 
-    top_p=0, 
-    )
-
 ## Define state ------------------------------------------------------------------------
 # This defines the object that is passed between each node
 # in the graph. We will create different nodes for each agent and tool
@@ -63,11 +57,12 @@ def __bind(llm, tools:list, agnet_prompt:str):
     return agent
 
 
-def service_node_build(state:AgentState, name, tools) -> AgentState:
+def service_node_build(state:AgentState, name, tools, **llm_kwargs) -> AgentState:
     llm = ChatOpenAI(
     model="gpt-4o-mini-2024-07-18", 
     temperature=0, 
     top_p=0, 
+    **llm_kwargs
     )
     
     agent = __bind(llm, tools, SERVICE_PROMPT)
