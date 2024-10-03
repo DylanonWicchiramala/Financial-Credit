@@ -17,6 +17,7 @@ from langchain.globals import set_debug, set_verbose
 set_verbose(False)
 set_debug(False)
 
+from langchain_openai import ChatOpenAI
 from langchain_core.messages import (
     HumanMessage,
 )
@@ -25,7 +26,8 @@ from langgraph.graph import END, StateGraph, START
 from agents import(
     AgentState,
     agent_names,
-    agent_nodes
+    agent_nodes,
+    service_node_build
 )
 from tools import get_tools_output, all_tools, set_current_user_id
 from functools import partial
@@ -55,8 +57,9 @@ class AgentBot:
         'verbose': False,
         'recursion_limit': 20,
         'thread_id': uuid.uuid4(),
+        'socketio_instance':None
     })
-    
+    # TODO: socketio_instance
     def __init__(self, **config:BotConfig):
         self.tool_node = ToolNode(all_tools)
         self.agent_names = agent_names
@@ -156,9 +159,15 @@ class AgentBot:
         
         workflow = StateGraph(AgentState)
 
+        llm = ChatOpenAI(
+            model="gpt-4o-mini-2024-07-18", 
+            temperature=0, 
+            top_p=0, 
+        )
+        
         # add agent nodes
-        for name, node in self.agent_nodes.items():
-            workflow.add_node(name, node)
+        self.agent_nodes["service"] = functools.partial(self.agent_nodes["service"], llm=llm)
+        workflow.add_node("service", self.agent_nodes["service"])
             
         workflow.add_node("call_tool", self.tool_node)
 
@@ -236,7 +245,7 @@ class AgentBot:
             return response
         
         
-    async def asubmit_user_message(
+    async def submit_user_message_async(
         self,
         user_input:str, 
         user_id:str="test", 

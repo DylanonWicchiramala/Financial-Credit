@@ -1,4 +1,4 @@
-from langchain_openai import ChatOpenAI
+import langchain_core
 from langchain_core.messages import (
     AIMessage, 
     BaseMessage,
@@ -8,6 +8,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 import operator
 from typing import Annotated, Sequence, TypedDict, List
+
+from langchain_core.tools.structured import StructuredTool
+from langchain_openai.chat_models.base import ChatOpenAI
 from agents.prompt import (
     SYSTEM_PROMPT,
     SERVICE_PROMPT
@@ -29,7 +32,7 @@ class AgentState(TypedDict):
 
 
 def __bind(llm, tools:list, agnet_prompt:str):
-    """ create llm with SYSTEM_PROMPT and agent prompt, bind tools, then return agent.
+    """ create llm with SYSTEM_PROMPT and agent prompt, bind tools, return LLM agent with tools and prompts.
     """
     ## create agents with prompt and tools.
     prompt = ChatPromptTemplate.from_messages(
@@ -57,14 +60,10 @@ def __bind(llm, tools:list, agnet_prompt:str):
     return agent
 
 
-def service_node_build(state:AgentState, name, tools, **llm_kwargs) -> AgentState:
-    llm = ChatOpenAI(
-    model="gpt-4o-mini-2024-07-18", 
-    temperature=0, 
-    top_p=0, 
-    **llm_kwargs
-    )
-    
+def service_node_build(state:AgentState, name:str, tools:StructuredTool, llm:ChatOpenAI) -> AgentState:
+    """ bulid `service` agent node to use in langgraph.
+        use functools.partial to pass the argument `name`, `tools`, `llm`.
+    """
     agent = __bind(llm, tools, SERVICE_PROMPT)
     
     result = agent.invoke(state)
