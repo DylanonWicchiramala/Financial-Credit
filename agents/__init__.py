@@ -31,7 +31,7 @@ class AgentState(TypedDict):
     sender: str
 
 
-def __bind(llm, tools:list, agnet_prompt:str):
+def __bind(llm, tools:list, agent_prompt:str):
     """ create llm with SYSTEM_PROMPT and agent prompt, bind tools, return LLM agent with tools and prompts.
     """
     ## create agents with prompt and tools.
@@ -45,7 +45,7 @@ def __bind(llm, tools:list, agnet_prompt:str):
             MessagesPlaceholder(variable_name="messages"),
         ]
     )
-    prompt = prompt.partial(system_message=agnet_prompt)
+    prompt = prompt.partial(system_message=agent_prompt)
     prompt = prompt.partial(agent_names=agent_names)
     
     # return llm without tools
