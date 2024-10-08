@@ -6,7 +6,6 @@ import functools
 from copy import copy
 
 from typing import TypedDict, Optional, NotRequired, Literal
-import database
 import database.customer
 
 tools_outputs=""
