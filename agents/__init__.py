@@ -18,9 +18,10 @@ from agents.prompt import (
 from tools import (
     all_tools, 
     set_customer_data,
-    __get_customer_data
+    CURRENT_USER_ID
 )
 import functools
+import database.customer
 
 ## Define state ------------------------------------------------------------------------
 # This defines the object that is passed between each node
@@ -29,6 +30,28 @@ class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
     chat_history: List[BaseMessage]
     sender: str
+
+
+def __get_customer_data()->dict:
+    """ this function to get customer personal data and credit data contain
+    """
+    global CURRENT_USER_ID
+    user_id = CURRENT_USER_ID
+    data_fields = [
+        "age",
+        "income_source",
+        "monthly_income",
+        "outstanding_loan_amount",
+        "loan_history",
+        "missed_payments",
+        "total_debt_payment_monthly",
+        "payment_types",
+        "significant_assets",
+    ]
+    customer_data = database.customer.get(user_id=user_id.strip())
+    for key in data_fields:
+        customer_data[key] = customer_data.get(key, None)
+    return customer_data
 
 
 def __bind(llm, tools:list, agent_prompt:str):

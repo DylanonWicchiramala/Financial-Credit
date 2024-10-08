@@ -1,5 +1,6 @@
 # %%
 ## Document vector store for context
+import deprecated
 from langchain_core.tools import tool
 import functools
 from copy import copy
@@ -88,7 +89,8 @@ def set_customer_data(input:CustomerInput):
     
     return database.customer.update(user_id=user_id, data=customer_data)
     
-    
+
+@deprecated.deprecated(reason="move to agents")   
 def __get_customer_data()->dict:
     """ this function to get customer personal data and credit data contain
     """
