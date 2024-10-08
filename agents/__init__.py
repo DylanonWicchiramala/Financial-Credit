@@ -18,7 +18,7 @@ from agents.prompt import (
 from tools import (
     all_tools, 
     set_customer_data,
-    get_customer_data
+    __get_customer_data
 )
 import functools
 
@@ -64,7 +64,12 @@ def service_node_build(state:AgentState, name:str, tools:StructuredTool, llm:Cha
     """ bulid `service` agent node to use in langgraph.
         use functools.partial to pass the argument `name`, `tools`, `llm`.
     """
-    agent = __bind(llm, tools, SERVICE_PROMPT)
+    
+    customer_data = str(__get_customer_data())
+    
+    prompt = SERVICE_PROMPT + "\nCustomer Data: " + customer_data
+    
+    agent = __bind(llm, tools, prompt)
     
     result = agent.invoke(state)
     # We convert the agent output into a format that is suitable to append to the global state
@@ -84,6 +89,6 @@ agent_names = ['service']
 
 agent_nodes = {name:None for name in agent_names}
 
-agent_nodes['service'] = functools.partial(service_node_build, name='service', tools=all_tools)
+agent_nodes['service'] = functools.partial(service_node_build, name='service', tools=[set_customer_data])
 
 # agent_nodes['service']({'chat_history':[], 'messages':[]})

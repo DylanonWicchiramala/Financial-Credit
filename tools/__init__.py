@@ -89,7 +89,7 @@ def set_customer_data(input:CustomerInput):
     return database.customer.update(user_id=user_id, data=customer_data)
     
     
-def get_customer_data():
+def __get_customer_data()->dict:
     """ this function to get customer personal data and credit data contain
     """
     global CURRENT_USER_ID
@@ -112,11 +112,9 @@ def get_customer_data():
 
 
 set_customer_data = tool(set_customer_data)
-get_customer_data = tool(get_customer_data)
 
 all_tools = [
     set_customer_data,
-    get_customer_data,
     ]
 
 tools = {tool.name: tool for tool in all_tools}

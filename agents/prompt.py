@@ -42,7 +42,6 @@ SERVICE_PROMPT = """
             3. **Gather Missing Financial Data**:
                 If the customer’s profile is missing some information, such as current debt, monthly interest payments, or income, politely ask the customer to provide the missing details. 
                 Use the set_customer_data tool to save the new information every time you get it from customer, to save data into the database after getting it.
-                You need to use get_customer_data everytimes, because the data maybe update.
                 Don't ask everything in a single question.
                 
                 Example: 

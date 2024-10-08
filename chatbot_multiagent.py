@@ -59,13 +59,12 @@ class AgentBot:
         'thread_id': uuid.uuid4(),
         'socketio_instance':None
     })
-    # TODO: socketio_instance
     def __init__(self, **config:BotConfig):
         self.tool_node = ToolNode(all_tools)
         self.agent_names = agent_names
         self.agent_nodes = agent_nodes
         self.config.update(**config)
-        self.create_workflow()
+        self.workflow = self.create_workflow()
                 
         
     def __with_debug_command(self, func):
@@ -193,9 +192,7 @@ class AgentBot:
 
         workflow.add_edge(START, "service")
         
-        self.workflow = workflow
-        
-        return self.workflow
+        return workflow
 
 
     def submit_user_message(
